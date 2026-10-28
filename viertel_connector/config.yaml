@@ -1,0 +1,30 @@
+name: Viertel connector
+version: "0.1.0"
+slug: viertel_connector
+description: Runs your Viertel plan on your battery, wallbox and heat pump.
+url: https://github.com/yos17/viertel-connector
+arch: [aarch64, amd64, armv7]
+init: false
+startup: application
+boot: auto
+homeassistant_api: true
+options:
+  viertel_url: ""
+  token: ""
+  evcc_url: ""
+  evcc_password: ""
+  evcc_loadpoint: 1
+  heat_pump_climate: ""
+  indoor_temperature: ""
+  battery_soc_sensor: ""
+  simulate: false
+schema:
+  viertel_url: url
+  token: password
+  evcc_url: str?
+  evcc_password: password?
+  evcc_loadpoint: int(1,)
+  heat_pump_climate: str?
+  indoor_temperature: str?
+  battery_soc_sensor: str?
+  simulate: bool
