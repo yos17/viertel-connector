@@ -33,15 +33,17 @@ def _ts(s):
 
 class Agent:
     def __init__(self, cloud, drivers, report_every_s=300, control_every_s=30,
-                 stale_after=timedelta(hours=3), now=lambda: datetime.now(timezone.utc)):
+                 stale_after=timedelta(hours=3), now=lambda: datetime.now(timezone.utc), observe_only=False):
         self.cloud, self.drivers = cloud, drivers
+        self.observe_only = observe_only      # read and plan, log what would happen, switch nothing
+        self._last_logged = None
         self.report_every_s, self.control_every_s = report_every_s, control_every_s
         self.stale_after, self.now = stale_after, now
         self.schedule, self.last_ok, self.last_report = [], None, None
         self.released = True
 
     def report(self):
-        state = {"connector": " + ".join(d.name for d in self.drivers)}
+        state = {"connector": " + ".join(d.name for d in self.drivers), "observe_only": self.observe_only}
         for d in self.drivers:
             try:
                 state.update({k: v for k, v in d.read().items() if v is not None})
@@ -66,6 +68,12 @@ class Agent:
 
     def control(self):
         cmd = self.current_command()
+        if self.observe_only:
+            shown = None if cmd is None else {k: cmd.get(k) for k in ("battery_mode", "ev_charge", "heat_setpoint_c")}
+            if shown != self._last_logged:
+                log.info("observe only, would set: %s", shown if shown else "devices back to normal")
+                self._last_logged = shown
+            return cmd
         if cmd is None:
             if not self.released:
                 log.warning("no valid plan: handing devices back to their normal settings")

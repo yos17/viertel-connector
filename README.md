@@ -3,7 +3,7 @@
 Der Viertel-Connector führt Ihren [Viertel](https://viertel.fly.dev)-Plan zu Hause aus: Er lädt das E-Auto und den
 Speicher und wärmt das Haus dann vor, wenn Strom günstig ist, und meldet Viertel alle fünf Minuten den aktuellen Stand.
 
-**Testphase (Beta).** Der Connector ist neu und erst mit einem simulierten Haus getestet.
+**Testphase (Beta).** Der Connector ist neu: getestet mit einem simulierten Haus und mit evcc 0.318 im Demo-Modus, noch nicht in einem echten Haus.
 Sie möchten ihn als Erste ausprobieren? Tragen Sie sich ein: <https://viertel.fly.dev/mitmachen>
 
 ## Installation in Home Assistant
@@ -13,6 +13,8 @@ Sie möchten ihn als Erste ausprobieren? Tragen Sie sich ein: <https://viertel.f
 2. Home Assistant: **Einstellungen → Add-ons → Add-on-Store → ⋮ → Repositories** und diese Adresse hinzufügen:
    `https://github.com/yos17/viertel-connector`
 3. **Viertel connector** installieren, unter **Konfiguration** die Zeilen von Ihrer Hausseite einfügen, starten.
+4. Die ersten Tage nur beobachten (`observe_only: true`, voreingestellt): Es wird nichts geschaltet. Danach ausschalten,
+   dann steuert der Connector. Details im Reiter „Dokumentation“ des Add-ons.
 
 ## Was er steuert
 
@@ -37,7 +39,7 @@ docker run -d --restart unless-stopped --name viertel \
   -e EVCC_URL=http://192.168.1.20:7070 viertel-connector
 ```
 
-Zum Ausprobieren ohne Geräte: `-e SIMULATE=1`.
+Zum Ausprobieren ohne Geräte: `-e SIMULATE=1`. Nur beobachten, nichts schalten: `-e OBSERVE_ONLY=1`.
 
 ---
 

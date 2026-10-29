@@ -17,7 +17,7 @@ log = logging.getLogger("viertel")
 
 
 class EvccDriver:
-    """Car and home battery through evcc's REST API (tested against evcc 0.318 field names).
+    """Car and home battery through evcc's REST API (tested against a running evcc 0.318.1 in demo mode).
 
     - Charging: switches the loadpoint between "now" and the user's own default mode.
     - Battery: external battery mode must be re-sent at least every 60 s or evcc reverts.
@@ -58,8 +58,8 @@ class EvccDriver:
         return {
             "battery_soc_pct": soc,
             "ev_connected": bool(lp.get("connected")),
-            # evcc publishes session energy in Wh (the API docs say kWh; the live values are Wh).
-            "ev_session_kwh": None if session is None else (session / 1000 if session > 200 else session),
+            # evcc publishes session energy in Wh (measured on evcc 0.318.1: +27.6 in 20 s at 3.7 kW).
+            "ev_session_kwh": None if session is None else session / 1000,
             "pv_kw": None if d.get("pvPower") is None else d["pvPower"] / 1000,
             "grid_kw": None if grid_w is None else grid_w / 1000,
             "home_kw": None if d.get("homePower") is None else d["homePower"] / 1000,

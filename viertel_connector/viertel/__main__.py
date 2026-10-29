@@ -23,6 +23,7 @@ def settings():
             "ha_url": "http://supervisor/core", "ha_token": os.environ.get("SUPERVISOR_TOKEN"),
             "climate": o.get("heat_pump_climate"), "indoor": o.get("indoor_temperature"),
             "battery_soc": o.get("battery_soc_sensor"), "simulate": o.get("simulate", False),
+            "observe_only": o.get("observe_only", True),
         }
     e = os.environ.get
     return {
@@ -32,6 +33,7 @@ def settings():
         "ha_url": e("HA_URL"), "ha_token": e("HA_TOKEN"),
         "climate": e("HEAT_PUMP_CLIMATE"), "indoor": e("INDOOR_TEMPERATURE"),
         "battery_soc": e("BATTERY_SOC_SENSOR"), "simulate": e("SIMULATE", "") in ("1", "true", "yes"),
+        "observe_only": e("OBSERVE_ONLY", "") in ("1", "true", "yes"),
         "sim_speed": float(e("SIM_SPEED", "1")),
     }
 
@@ -49,14 +51,15 @@ def build(s):
                                            s.get("indoor") or None, s.get("battery_soc") or None))
     if not drivers:
         sys.exit("No devices configured. Set EVCC_URL and/or Home Assistant entities, or SIMULATE=1.")
-    return Agent(CloudClient(s["url"], s["token"]), drivers)
+    return Agent(CloudClient(s["url"], s["token"]), drivers, observe_only=bool(s.get("observe_only")))
 
 
 def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     agent = build(settings())
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))   # run_forever's finally releases devices
-    logging.getLogger("viertel").info("connector started with %s", ", ".join(d.name for d in agent.drivers))
+    logging.getLogger("viertel").info("connector started with %s%s", ", ".join(d.name for d in agent.drivers),
+                                      " (observe only: nothing is switched)" if agent.observe_only else "")
     agent.run_forever()
 
 
